@@ -35,10 +35,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
 .card-title { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
 .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.input-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .input-group { display: flex; flex-direction: column; gap: 5px; }
 .input-group label { font-size: 12px; color: var(--text2); font-weight: 500; }
-.input-group input { border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 14px; color: var(--text); background: var(--surface); outline: none; transition: border-color 0.15s; width: 100%; }
-.input-group input:focus { border-color: var(--purple); }
+.input-group input, .input-group select { border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 14px; color: var(--text); background: var(--surface); outline: none; transition: border-color 0.15s; width: 100%; }
+.input-group input:focus, .input-group select:focus { border-color: var(--purple); }
 .input-hint { font-size: 11px; color: var(--text3); margin-top: 2px; }
 .slider-row { display: flex; align-items: center; gap: 12px; }
 .slider-row input[type=range] { flex: 1; accent-color: var(--purple); }
@@ -75,14 +76,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .btn:hover { opacity: 0.85; }
 .btn-primary { background: var(--purple); color: #fff; flex: 1; }
 .btn-secondary { background: var(--surface2); color: var(--text2); }
-.history-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0e8; font-size: 13px; }
-.history-row:last-child { border-bottom: none; }
-.history-month { font-weight: 500; min-width: 100px; }
-.history-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip { font-size: 11px; padding: 2px 8px; border-radius: 12px; }
-.chip-green { background: var(--green-bg); color: #0F6E56; }
-.chip-purple { background: var(--purple-bg); color: #3C3489; }
-.chip-gray { background: var(--surface2); color: var(--text3); }
+.btn-sheets { background: #1D9E75; color: #fff; }
 .chart-wrap { position: relative; width: 100%; height: 200px; }
 .status-msg { font-size: 12px; padding: 8px 12px; border-radius: 6px; margin-top: 10px; display: none; }
 .status-ok { background: var(--green-bg); color: #0F6E56; }
@@ -94,7 +88,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .panel.active { display: block; }
 @media (max-width: 520px) {
   .result-grid { grid-template-columns: 1fr 1fr; }
-  .input-grid { grid-template-columns: 1fr; }
+  .input-grid, .input-grid-3 { grid-template-columns: 1fr; }
   .action-bar { flex-direction: column; }
 }
 </style>
@@ -117,39 +111,66 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
   <div class="header">
     <h1>Planificador mensual</h1>
-    <p>Ingresá el sueldo y el MEP del día — el resto se calcula solo.</p>
+    <p>Ingresá el mes, el sueldo y el MEP — el resto se calcula solo.</p>
     <span class="month-badge" id="currentMonth">—</span>
   </div>
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab('plan')">Plan del mes</div>
     <div class="tab" onclick="switchTab('budget')">Presupuesto</div>
-    <div class="tab" onclick="switchTab('history')">Historial</div>
   </div>
 
+  <!-- TAB: PLAN -->
   <div class="panel active" id="tab-plan">
     <div class="card">
       <p class="card-title">Datos del mes</p>
-      <div class="input-grid">
+      <div class="input-grid-3" style="margin-bottom:1rem;">
+        <div class="input-group">
+          <label>Mes</label>
+          <select id="mesSelect" onchange="updateMonthBadge()">
+            <option value="enero">Enero</option>
+            <option value="febrero">Febrero</option>
+            <option value="marzo">Marzo</option>
+            <option value="abril">Abril</option>
+            <option value="mayo">Mayo</option>
+            <option value="junio" selected>Junio</option>
+            <option value="julio">Julio</option>
+            <option value="agosto">Agosto</option>
+            <option value="septiembre">Septiembre</option>
+            <option value="octubre">Octubre</option>
+            <option value="noviembre">Noviembre</option>
+            <option value="diciembre">Diciembre</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Año</label>
+          <select id="anioSelect" onchange="updateMonthBadge()">
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+            <option value="2030">2030</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Cotización MEP (ARS/USD)</label>
+          <input type="number" id="mep" value="1445" step="1" oninput="recalc()">
+          <span class="input-hint">Consultá en Balanz</span>
+        </div>
+      </div>
+      <div class="input-grid" style="margin-bottom:1rem;">
         <div class="input-group">
           <label>Sueldo neto acreditado (ARS)</label>
           <input type="number" id="sueldo" value="5500000" step="1000" oninput="recalc()">
           <span class="input-hint">Lo que apareció en la cuenta</span>
         </div>
         <div class="input-group">
-          <label>Cotización MEP del día (ARS/USD)</label>
-          <input type="number" id="mep" value="1445" step="1" oninput="recalc()">
-          <span class="input-hint">Consultá en Balanz antes de transferir</span>
-        </div>
-      </div>
-      <div style="margin-top:1rem;">
-        <div class="input-group">
           <label>% de ahorro este mes</label>
           <div class="slider-row">
             <input type="range" id="pctSlider" min="10" max="60" value="25" step="1" oninput="syncSlider(this.value); recalc()">
             <span class="slider-val" id="sliderLabel">25%</span>
           </div>
-          <span class="input-hint">Default 25% — subilo si este mes entraron extras</span>
+          <span class="input-hint">Default 25% — subilo si entraron extras</span>
         </div>
       </div>
     </div>
@@ -203,11 +224,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
     <div class="action-bar">
       <button class="btn btn-secondary" onclick="resetMonth()">Resetear</button>
-      <button class="btn btn-primary" onclick="guardarMes()">Guardar mes en Google Sheets →</button>
+      <button class="btn btn-sheets" onclick="window.open('https://docs.google.com/spreadsheets/d/1zhr1ftZInYPyTkGlXMiZo4GpOdDi0etiaUh1BOowjwg/edit','_blank')">Ver historial en Sheets ↗</button>
+      <button class="btn btn-primary" onclick="guardarMes()">Guardar mes →</button>
     </div>
     <div class="status-msg" id="statusMsg"></div>
   </div>
 
+  <!-- TAB: PRESUPUESTO -->
   <div class="panel" id="tab-budget">
     <div class="card">
       <p class="card-title">Presupuesto por categoría</p>
@@ -227,27 +250,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     </div>
   </div>
 
-  <div class="panel" id="tab-history">
-    <div class="card">
-      <p class="card-title">Acumulado potes (USD)</p>
-      <div class="chart-wrap"><canvas id="historyChart"></canvas></div>
-    </div>
-    <div class="card">
-      <p class="card-title">Meses guardados</p>
-      <div id="historyList"><p style="font-size:13px;color:var(--text3);">Cargando...</p></div>
-    </div>
-  </div>
-
 </div>
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzCaY1WrakgrM-jn81FUEshCRQzMZAZrSC-xz25mG6rgNfwkbf2WeE0gJ1odGOpHsy/exec';
-const PW_HASH = '7e5bda4d9c3f2a1e8b0c6d9f4a2e7b1c3d5f0e8a2b4c6d9e1f3a5b7c0d2e4f'; // placeholder, checked in JS
 
 function checkPw() {
   const val = document.getElementById('pwInput').value;
-  // Simple obfuscated check — not cryptographic but sufficient for personal use
-  const correct = atob('NjgzOHBhdG9uMjM='); // base64 of the password
+  const correct = atob('NjgzOHBhdG9uMjM=');
   if (val === correct) {
     document.getElementById('lockScreen').style.display = 'none';
     document.getElementById('appContent').style.display = 'block';
@@ -275,26 +285,30 @@ const DEFAULT_BUDGET = [
 ];
 
 let budget = DEFAULT_BUDGET.map(b => ({...b}));
-let historyData = [];
 let budgetChartInstance = null;
-let historyChartInstance = null;
 
 function init() {
   const now = new Date();
-  document.getElementById('currentMonth').textContent =
-    now.toLocaleString('es-AR', { month: 'long', year: 'numeric' });
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('mesSelect').value = meses[now.getMonth()];
+  document.getElementById('anioSelect').value = now.getFullYear().toString();
+  updateMonthBadge();
   renderBudgetTable();
   recalc();
-  loadHistory();
+}
+
+function updateMonthBadge() {
+  const mes = document.getElementById('mesSelect').value;
+  const anio = document.getElementById('anioSelect').value;
+  document.getElementById('currentMonth').textContent = mes + ' ' + anio;
 }
 
 function switchTab(name) {
-  const names = ['plan','budget','history'];
+  const names = ['plan','budget'];
   document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   if (name === 'budget') renderBudgetChart();
-  if (name === 'history') renderHistoryChart();
 }
 
 function syncSlider(val) { document.getElementById('sliderLabel').textContent = val + '%'; }
@@ -323,8 +337,8 @@ function recalc() {
   document.getElementById('res-mudanza').textContent = 'USD ' + Math.round(mudanza_usd);
   document.getElementById('res-retiro').textContent  = 'USD ' + Math.round(retiro_usd);
   document.getElementById('res-max-gastos').textContent = fmt(total_gastos);
-  document.getElementById('res-colchon').textContent = fmt(colchon);
-  document.getElementById('res-colchon-usd').textContent = Math.round(colchon / mep);
+  document.getElementById('res-colchon').textContent = fmt(Math.max(0, colchon));
+  document.getElementById('res-colchon-usd').textContent = Math.round(Math.max(0, colchon) / mep);
 
   document.getElementById('alloc-ahorro-pct').textContent = Math.round(pct*100) + '%';
   document.getElementById('alloc-gastos-pct').textContent = Math.round(gastos_pct*100) + '%';
@@ -389,72 +403,33 @@ async function guardarMes() {
   const sueldo = parseFloat(document.getElementById('sueldo').value);
   const mep    = parseFloat(document.getElementById('mep').value);
   const pct    = parseFloat(document.getElementById('pctSlider').value) / 100;
+  const mes    = document.getElementById('mesSelect').value;
+  const anio   = document.getElementById('anioSelect').value;
   const ahorro_ars  = Math.round(sueldo * pct);
   const ahorro_usd  = ahorro_ars / mep;
   const total_gastos = budget.reduce((s,b)=>s+b.amount,0);
   const colchon = sueldo - ahorro_ars - total_gastos;
-  const fecha = new Date().toLocaleDateString('es-AR', { month:'long', year:'numeric' });
-  const payload = { fecha, sueldo:Math.round(sueldo), mep:Math.round(mep), pct_ahorro:Math.round(pct*100),
-    ahorro_ars, ahorro_usd:Math.round(ahorro_usd), mudanza_usd:Math.round(ahorro_usd*0.70),
-    retiro_usd:Math.round(ahorro_usd*0.30), max_gastos:total_gastos, colchon_ars:Math.round(colchon) };
+  const payload = {
+    fecha: mes + ' de ' + anio,
+    sueldo: Math.round(sueldo), mep: Math.round(mep), pct_ahorro: Math.round(pct*100),
+    ahorro_ars, ahorro_usd: Math.round(ahorro_usd),
+    mudanza_usd: Math.round(ahorro_usd*0.70), retiro_usd: Math.round(ahorro_usd*0.30),
+    max_gastos: total_gastos, colchon_ars: Math.round(colchon)
+  };
   try {
     const form = new FormData();
     form.append('data', JSON.stringify(payload));
     await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: form });
     msg.className = 'status-msg status-ok';
-    msg.textContent = `✓ Mes "${fecha}" guardado en Google Sheets.`;
+    msg.textContent = `✓ ${mes} ${anio} guardado en Google Sheets.`;
     msg.style.display = 'block';
     setTimeout(()=>{msg.style.display='none';}, 4000);
-    historyData.unshift(payload);
-    renderHistoryList();
-    if (historyChartInstance) renderHistoryChart();
   } catch(e) {
     msg.className = 'status-msg status-err';
     msg.textContent = 'Error al guardar. Revisá la conexión.';
     msg.style.display = 'block';
   }
-  btn.textContent = 'Guardar mes en Google Sheets →'; btn.disabled = false;
-}
-
-async function loadHistory() {
-  historyData = [
-    { fecha:'junio 2026', mudanza_usd:0, retiro_usd:346, note:'SAC — CEDEARs SPY $500k' }
-  ];
-  renderHistoryList();
-}
-
-function renderHistoryList() {
-  const el = document.getElementById('historyList');
-  if (!historyData.length) { el.innerHTML='<p style="font-size:13px;color:var(--text3)">Sin datos aún.</p>'; return; }
-  el.innerHTML = historyData.map(h=>`
-    <div class="history-row">
-      <span class="history-month">${h.fecha}</span>
-      <div class="history-chips">
-        <span class="chip chip-green">Mudanza +USD ${h.mudanza_usd}</span>
-        <span class="chip chip-purple">Retiro +USD ${h.retiro_usd}</span>
-        ${h.note?`<span class="chip chip-gray">${h.note}</span>`:''}
-      </div>
-    </div>`).join('');
-}
-
-function renderHistoryChart() {
-  const ctx = document.getElementById('historyChart').getContext('2d');
-  if (historyChartInstance) historyChartInstance.destroy();
-  const rev = [...historyData].reverse();
-  let cumMud=0, cumRet=0;
-  historyChartInstance = new Chart(ctx, {
-    type:'line',
-    data:{
-      labels: rev.map(h=>h.fecha),
-      datasets:[
-        {label:'Mudanza', data:rev.map(h=>{cumMud+=h.mudanza_usd; return cumMud;}), borderColor:'#1D9E75', backgroundColor:'rgba(29,158,117,0.08)', fill:true, tension:0.3, pointRadius:4, borderWidth:2},
-        {label:'Retiro',  data:rev.map(h=>{cumRet+=h.retiro_usd;  return cumRet;}), borderColor:'#534AB7', backgroundColor:'rgba(83,74,183,0.08)',  fill:true, tension:0.3, pointRadius:4, borderWidth:2},
-      ]
-    },
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{font:{size:11},boxWidth:10}},tooltip:{callbacks:{label:(ctx)=>` ${ctx.dataset.label}: USD ${ctx.parsed.y}`}}},
-      scales:{x:{ticks:{font:{size:11}}},y:{ticks:{callback:(v)=>'USD '+v}}}}
-  });
+  btn.textContent = 'Guardar mes →'; btn.disabled = false;
 }
 
 function resetMonth() {
