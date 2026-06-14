@@ -398,7 +398,9 @@ async function guardarMes() {
     ahorro_ars, ahorro_usd:Math.round(ahorro_usd), mudanza_usd:Math.round(ahorro_usd*0.70),
     retiro_usd:Math.round(ahorro_usd*0.30), max_gastos:total_gastos, colchon_ars:Math.round(colchon) };
   try {
-    await fetch(SCRIPT_URL, { method:'POST', mode:'cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const form = new FormData();
+    form.append('data', JSON.stringify(payload));
+    await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: form });
     msg.className = 'status-msg status-ok';
     msg.textContent = `✓ Mes "${fecha}" guardado en Google Sheets.`;
     msg.style.display = 'block';
