@@ -34,10 +34,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
 .input-group { display: flex; flex-direction: column; gap: 5px; }
 .input-group label { font-size: 12px; color: var(--text2); font-weight: 500; }
-.input-group input, .input-group select { border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 14px; color: var(--text); background: var(--surface); outline: none; transition: border-color 0.15s; width: 100%; }
-.input-group input:focus, .input-group select:focus { border-color: var(--purple); }
+.input-group input, .input-group select, .input-group textarea { border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 14px; color: var(--text); background: var(--surface); outline: none; transition: border-color 0.15s; width: 100%; }
+.input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: var(--purple); }
 .input-hint { font-size: 11px; color: var(--text3); margin-top: 2px; }
-/* Ahorro bidireccional */
 .ahorro-block { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--surface); }
 .ahorro-block label { font-size: 12px; color: var(--text2); font-weight: 500; display: block; margin-bottom: 8px; }
 .ahorro-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
@@ -48,7 +47,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .slider-row input[type=range] { flex: 1; accent-color: var(--purple); }
 .slider-val { font-size: 15px; font-weight: 600; color: var(--purple); min-width: 42px; text-align: right; }
 .input-hint-small { font-size: 11px; color: var(--text3); }
-/* Results */
 .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1rem; }
 .result-box { border-radius: 8px; padding: 12px 14px; }
 .r-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
@@ -67,7 +65,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .alloc-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 5px; }
 .alloc-bar-track { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
 .alloc-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
-/* Budget */
 .budget-table { width: 100%; border-collapse: collapse; }
 .budget-table th { font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text3); padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border); }
 .budget-table td { padding: 8px; border-bottom: 1px solid #f0f0e8; vertical-align: middle; }
@@ -87,11 +84,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .status-msg { font-size: 12px; padding: 8px 12px; border-radius: 6px; margin-top: 10px; display: none; }
 .status-ok { background: var(--green-bg); color: #0F6E56; }
 .status-err { background: var(--red-bg); color: #B91C1C; }
-.tabs { display: flex; gap: 4px; margin-bottom: 1rem; }
+.tabs { display: flex; gap: 4px; margin-bottom: 1rem; flex-wrap: wrap; }
 .tab { padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text2); transition: all 0.15s; }
 .tab.active { background: var(--purple); color: #fff; border-color: var(--purple); }
 .panel { display: none; }
 .panel.active { display: block; }
+.stock-total { background: var(--purple-bg); border-radius: 10px; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.stock-total-label { font-size: 12px; color: #3C3489; }
+.stock-total-value { font-size: 24px; font-weight: 600; color: #3C3489; }
 @media (max-width: 520px) {
   .result-grid { grid-template-columns: 1fr 1fr; }
   .input-grid, .input-grid-3 { grid-template-columns: 1fr; }
@@ -122,12 +122,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="tabs">
     <div class="tab active" onclick="switchTab('plan')">Plan del mes</div>
     <div class="tab" onclick="switchTab('budget')">Presupuesto</div>
+    <div class="tab" onclick="switchTab('stock')">Foto Balanz</div>
   </div>
 
+  <!-- TAB: PLAN -->
   <div class="panel active" id="tab-plan">
     <div class="card">
       <p class="card-title">Datos del mes</p>
-
       <div class="input-grid-3">
         <div class="input-group">
           <label>Mes</label>
@@ -154,7 +155,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           <span class="input-hint">Consultá en Balanz</span>
         </div>
       </div>
-
       <div class="input-grid">
         <div class="input-group">
           <label>Sueldo neto acreditado (ARS)</label>
@@ -167,7 +167,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
             <input type="number" id="ahorroArs" value="1375000" step="10000" oninput="onAhorroArsChange()">
             <span class="sep">·</span>
             <input type="number" id="ahorroPct" value="25" min="1" max="100" step="1" style="width:70px;" oninput="onAhorroPctChange()">
-            <span class="sep" style="font-size:14px; font-weight:500; color:var(--purple);">%</span>
+            <span class="sep" style="font-size:14px;font-weight:500;color:var(--purple);">%</span>
           </div>
           <div class="slider-row">
             <input type="range" id="pctSlider" min="1" max="100" value="25" step="1" oninput="onSliderChange(this.value)">
@@ -227,12 +227,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
     <div class="action-bar">
       <button class="btn btn-secondary" onclick="resetMonth()">Resetear</button>
-      <button class="btn btn-sheets" onclick="window.open('https://docs.google.com/spreadsheets/d/1zhr1ftZInYPyTkGlXMiZo4GpOdDi0etiaUh1BOowjwg/edit','_blank')">Ver historial en Sheets ↗</button>
+      <button class="btn btn-sheets" onclick="window.open('https://docs.google.com/spreadsheets/d/1zhr1ftZInYPyTkGlXMiZo4GpOdDi0etiaUh1BOowjwg/edit','_blank')">Ver en Sheets ↗</button>
       <button class="btn btn-primary" onclick="guardarMes()">Guardar mes →</button>
     </div>
     <div class="status-msg" id="statusMsg"></div>
   </div>
 
+  <!-- TAB: PRESUPUESTO -->
   <div class="panel" id="tab-budget">
     <div class="card">
       <p class="card-title">Presupuesto por categoría</p>
@@ -251,6 +252,74 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="chart-wrap"><canvas id="budgetChart"></canvas></div>
     </div>
   </div>
+
+  <!-- TAB: FOTO BALANZ -->
+  <div class="panel" id="tab-stock">
+    <div class="card">
+      <p class="card-title">Foto mensual de Balanz</p>
+      <p style="font-size:12px; color:var(--text3); margin-bottom:1rem;">Una vez por mes, ingresá el valor actual de cada pote según lo que muestra Balanz. Se guarda en la hoja "Stock" del sheet.</p>
+
+      <div class="input-grid-3" style="margin-bottom:1rem;">
+        <div class="input-group">
+          <label>Mes</label>
+          <select id="stockMes">
+            <option value="enero">Enero</option><option value="febrero">Febrero</option>
+            <option value="marzo">Marzo</option><option value="abril">Abril</option>
+            <option value="mayo">Mayo</option><option value="junio">Junio</option>
+            <option value="julio">Julio</option><option value="agosto">Agosto</option>
+            <option value="septiembre">Septiembre</option><option value="octubre">Octubre</option>
+            <option value="noviembre">Noviembre</option><option value="diciembre">Diciembre</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Año</label>
+          <select id="stockAnio">
+            <option value="2026" selected>2026</option><option value="2027">2027</option>
+            <option value="2028">2028</option><option value="2029">2029</option>
+            <option value="2030">2030</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="input-grid" style="margin-bottom:1rem;">
+        <div class="input-group">
+          <label>Pote Mudanza — valor actual (USD)</label>
+          <input type="number" id="stockMudanza" value="0" step="1" oninput="updateStockTotal()">
+          <span class="input-hint">ONs + MEP en Balanz</span>
+        </div>
+        <div class="input-group">
+          <label>Pote Retiro — valor actual (USD)</label>
+          <input type="number" id="stockRetiro" value="333" step="1" oninput="updateStockTotal()">
+          <span class="input-hint">CEDEARs SPY + QQQ en Balanz</span>
+        </div>
+      </div>
+
+      <div class="stock-total">
+        <div>
+          <p class="stock-total-label">Total patrimonio Balanz</p>
+          <p class="stock-total-value" id="stockTotal">USD 333</p>
+        </div>
+        <div style="text-align:right;">
+          <p class="stock-total-label">Mudanza</p>
+          <p style="font-size:13px; color:#3C3489; font-weight:500;" id="stockMudanzaShow">USD 0</p>
+          <p class="stock-total-label" style="margin-top:4px;">Retiro</p>
+          <p style="font-size:13px; color:#3C3489; font-weight:500;" id="stockRetiroShow">USD 333</p>
+        </div>
+      </div>
+
+      <div class="input-group" style="margin-bottom:1rem;">
+        <label>Notas (opcional)</label>
+        <textarea id="stockNotas" rows="2" placeholder="Ej: SPY 26 nominales, rendimiento -1.8%..."></textarea>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn btn-sheets" onclick="window.open('https://docs.google.com/spreadsheets/d/1zhr1ftZInYPyTkGlXMiZo4GpOdDi0etiaUh1BOowjwg/edit','_blank')">Ver en Sheets ↗</button>
+        <button class="btn btn-primary" onclick="guardarStock()">Guardar foto →</button>
+      </div>
+      <div class="status-msg" id="statusMsgStock"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -291,11 +360,16 @@ let updatingBidirectional = false;
 function init() {
   const now = new Date();
   const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  document.getElementById('mesSelect').value = meses[now.getMonth()];
-  document.getElementById('anioSelect').value = now.getFullYear().toString();
+  const mesActual = meses[now.getMonth()];
+  const anioActual = now.getFullYear().toString();
+  document.getElementById('mesSelect').value = mesActual;
+  document.getElementById('anioSelect').value = anioActual;
+  document.getElementById('stockMes').value = mesActual;
+  document.getElementById('stockAnio').value = anioActual;
   updateMonthBadge();
   renderBudgetTable();
   recalc();
+  updateStockTotal();
 }
 
 function updateMonthBadge() {
@@ -304,17 +378,16 @@ function updateMonthBadge() {
 }
 
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['plan','budget'][i] === name));
+  const names = ['plan','budget','stock'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   if (name === 'budget') renderBudgetChart();
 }
 
-// ── Bidirectional ahorro inputs ───────────────────────────────────────────────
 function getSueldo() { return parseFloat(document.getElementById('sueldo').value) || 5500000; }
 
 function onSueldoChange() {
-  // When sueldo changes, keep the % and update the ARS amount
   const sueldo = getSueldo();
   const pct = parseFloat(document.getElementById('pctSlider').value) / 100;
   document.getElementById('ahorroArs').value = Math.round(sueldo * pct);
@@ -358,7 +431,6 @@ function onAhorroArsChange() {
   recalc();
 }
 
-// ── Main calc ─────────────────────────────────────────────────────────────────
 function fmt(n) {
   if (Math.abs(n) >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
   if (Math.abs(n) >= 1000) return '$' + Math.round(n/1000) + 'k';
@@ -390,11 +462,18 @@ function recalc() {
   document.getElementById('alloc-ahorro-bar').style.width  = Math.min(100, Math.round(pct * 100)) + '%';
   document.getElementById('alloc-gastos-bar').style.width  = Math.min(100, Math.round(gastos_pct * 100)) + '%';
   document.getElementById('alloc-colchon-bar').style.width = Math.max(0, Math.min(100, Math.round(colchon_pct * 100))) + '%';
-
   updateBudgetTable(sueldo);
 }
 
-// ── Budget ────────────────────────────────────────────────────────────────────
+function updateStockTotal() {
+  const mud = parseFloat(document.getElementById('stockMudanza').value) || 0;
+  const ret = parseFloat(document.getElementById('stockRetiro').value)  || 0;
+  const total = mud + ret;
+  document.getElementById('stockTotal').textContent     = 'USD ' + total.toLocaleString('es-AR');
+  document.getElementById('stockMudanzaShow').textContent = 'USD ' + mud.toLocaleString('es-AR');
+  document.getElementById('stockRetiroShow').textContent  = 'USD ' + ret.toLocaleString('es-AR');
+}
+
 function renderBudgetTable() {
   const tbody = document.getElementById('budgetBody');
   tbody.innerHTML = '';
@@ -442,9 +521,8 @@ function renderBudgetChart() {
   });
 }
 
-// ── Save ──────────────────────────────────────────────────────────────────────
 async function guardarMes() {
-  const btn = document.querySelector('.btn-primary');
+  const btn = document.querySelector('#tab-plan .btn-primary');
   const msg = document.getElementById('statusMsg');
   btn.textContent = 'Guardando...'; btn.disabled = true;
   const sueldo     = parseFloat(document.getElementById('sueldo').value);
@@ -456,6 +534,7 @@ async function guardarMes() {
   const pct_ahorro = Math.round(ahorro_ars / sueldo * 100);
   const total_gastos = budget.reduce((s,b)=>s+b.amount,0);
   const payload = {
+    tipo: 'historial',
     fecha: mes + ' de ' + anio, sueldo: Math.round(sueldo), mep: Math.round(mep), pct_ahorro,
     ahorro_ars: Math.round(ahorro_ars), ahorro_usd: Math.round(ahorro_usd),
     mudanza_usd: Math.round(ahorro_usd*0.70), retiro_usd: Math.round(ahorro_usd*0.30),
@@ -466,7 +545,7 @@ async function guardarMes() {
     form.append('data', JSON.stringify(payload));
     await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: form });
     msg.className = 'status-msg status-ok';
-    msg.textContent = `✓ ${mes} ${anio} guardado en Google Sheets.`;
+    msg.textContent = `✓ ${mes} ${anio} guardado en Historial.`;
     msg.style.display = 'block';
     setTimeout(()=>{ msg.style.display='none'; }, 4000);
   } catch(e) {
@@ -475,6 +554,36 @@ async function guardarMes() {
     msg.style.display = 'block';
   }
   btn.textContent = 'Guardar mes →'; btn.disabled = false;
+}
+
+async function guardarStock() {
+  const btn = document.querySelector('#tab-stock .btn-primary');
+  const msg = document.getElementById('statusMsgStock');
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+  const mes   = document.getElementById('stockMes').value;
+  const anio  = document.getElementById('stockAnio').value;
+  const mud   = parseFloat(document.getElementById('stockMudanza').value) || 0;
+  const ret   = parseFloat(document.getElementById('stockRetiro').value)  || 0;
+  const notas = document.getElementById('stockNotas').value;
+  const payload = {
+    tipo: 'stock',
+    fecha: mes + ' de ' + anio,
+    mudanza_usd: mud, retiro_usd: ret, total_usd: mud + ret, notas
+  };
+  try {
+    const form = new FormData();
+    form.append('data', JSON.stringify(payload));
+    await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: form });
+    msg.className = 'status-msg status-ok';
+    msg.textContent = `✓ Foto de ${mes} ${anio} guardada en Stock.`;
+    msg.style.display = 'block';
+    setTimeout(()=>{ msg.style.display='none'; }, 4000);
+  } catch(e) {
+    msg.className = 'status-msg status-err';
+    msg.textContent = 'Error al guardar. Revisá la conexión.';
+    msg.style.display = 'block';
+  }
+  btn.textContent = 'Guardar foto →'; btn.disabled = false;
 }
 
 function resetMonth() {
